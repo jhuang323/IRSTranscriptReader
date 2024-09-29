@@ -1,5 +1,12 @@
+#Finds the payers for each stock item
+
 import pdfplumber
 from collections import defaultdict
+import docx
+
+#User Settings: Name of the script
+TargetPDFFile = "Wage and Income Transcript.pdf"
+OutPutDocFileName = "StockPayerWageIncTranscriptSummary"
 
 def count_payer_fin_account(pdf_path):
     # Dictionary to store counts of each payer's FIN and name
@@ -24,10 +31,23 @@ def count_payer_fin_account(pdf_path):
                 key = (current_fin, name)
                 fin_name_counts[key] += 1
 
-    # Print the counts for each FIN and name combo
-    for (fin, name), count in fin_name_counts.items():
-        print(f"Payer's Federal Identification Number (FIN): {fin} | Name: {name} -> Count: {count}")
+    return fin_name_counts
+
+    
+
+def WordDocExport(APayerdict):
+    TheWdDoc = docx.Document()
+
+    TheWdDoc.add_heading("Summary of Stock Payer in Transcript")
+
+    
+    for (fin, name), count in APayerdict.items():
+        TheWdDoc.add_paragraph(f"Payer's Federal Identification Number (FIN): {fin} | Name: {name} -> Count: {count}")
+
+    TheWdDoc.save(OutPutDocFileName + ".docx")
 
 if __name__ == "__main__":
     pdf_path = r"Wage and Income Transcript.pdf"
-    count_payer_fin_account(pdf_path)
+    ReturnPayerDict = count_payer_fin_account(pdf_path)
+
+    WordDocExport(ReturnPayerDict)

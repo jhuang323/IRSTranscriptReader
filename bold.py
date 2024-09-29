@@ -3,6 +3,11 @@ from pdfminer.layout import LAParams, LTTextBoxHorizontal, LTChar
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from collections import Counter
+import docx
+
+#User Settings: Name of the script
+TargetPDFFile = "Wage and Income Transcript.pdf"
+OutPutDocFileName = "BoldWageIncTranscriptHeader"
 
 def extract_and_count_bold_texts(pdf_path, font_size_threshold=16):
     texts = []
@@ -35,10 +40,23 @@ def extract_and_count_bold_texts(pdf_path, font_size_threshold=16):
 
     return counts
 
+def WordDocExport(Adict):
+    TheWdDoc = docx.Document()
+
+    TheWdDoc.add_heading("Summary of Documents in Transcript")
+
+    for text, count in bold_text_counts.items():
+        TheWdDoc.add_paragraph(f"{text} (Count: {count})")
+
+    TheWdDoc.save(OutPutDocFileName + ".docx")
+    
+
+
 if __name__ == "__main__":
     pdf_path = r"Wage and Income Transcript.pdf"
     bold_text_counts = extract_and_count_bold_texts(pdf_path)
+
+    WordDocExport(bold_text_counts.items())
+
     
-    # Print the results
-    for text, count in bold_text_counts.items():
-        print(f"{text} (Count: {count})")
+

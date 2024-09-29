@@ -1,4 +1,10 @@
+#Given an IRS wage and Income transcript this program will extract the stock amounts and categorize them as Short or Long term
 import pdfplumber
+import docx
+
+#User Settings: Name of the script
+TargetPDFFile = "Wage and Income Transcript.pdf"
+OutPutDocFileName = "StockWageIncTranscriptSummary"
 
 def extract_and_group_by_fin_and_gain_loss_code(pdf_path):
     data = {}
@@ -69,16 +75,29 @@ def extract_and_group_by_fin_and_gain_loss_code(pdf_path):
             except ValueError:
                 pass
 
+    return (data,FINOccuranceDict)
+
+    
+
+def WordDocExport(Adict,FinalOccuranceDict):
+    TheWdDoc = docx.Document()
+
+    TheWdDoc.add_heading("Summary of Stock in Transcript")
+
     # Print the aggregated data
-    for fin, fin_data in data.items():
-        print(f"Payer's Federal Identification Number (FIN): {fin}")
+    for fin, fin_data in Adict.items():
+        TheWdDoc.add_paragraph(f"Payer's Federal Identification Number (FIN): {fin}")
         for code, values in fin_data.items():
-            print(f"  Type of Gain or Loss Code: {code}")
-            print(f"    Total Proceeds: ${values['Total Proceeds']:.2f}")
-            print(f"    Total Cost or Basis: ${values['Total Cost or Basis']:.2f}")
-        print(f" Count: {FINOccuranceDict[fin]}")
-        print("-" * 40)
+            TheWdDoc.add_paragraph(f"  Type of Gain or Loss Code: {code}")
+            TheWdDoc.add_paragraph(f"    Total Proceeds: ${values['Total Proceeds']:.2f}")
+            TheWdDoc.add_paragraph(f"    Total Cost or Basis: ${values['Total Cost or Basis']:.2f}")
+        TheWdDoc.add_paragraph(f" Count: {FinalOccuranceDict[fin]}")
+        TheWdDoc.add_paragraph("-" * 40)
+
+    TheWdDoc.save(OutPutDocFileName + ".docx")
 
 if __name__ == "__main__":
     pdf_path = r"Wage and Income Transcript.pdf"
-    extract_and_group_by_fin_and_gain_loss_code(pdf_path)
+    ThereturnDataTuple = extract_and_group_by_fin_and_gain_loss_code(pdf_path)
+
+    WordDocExport(ThereturnDataTuple[0],ThereturnDataTuple[1])
